@@ -50,7 +50,7 @@
  interface.
  @throws OZZipException If the data could not be read due to an error.
  */
-- (NSUInteger) readDataWithBuffer:(nonnull NSMutableData *)buffer;
+- (NSUInteger) readDataWithBuffer:(nonnull NSMutableData *)buffer NS_SWIFT_UNAVAILABLE("Use version defined in OZZipReadStream+NSError which doesn't throw Objective C exceptions");
 
 /**
  @brief Closes the read steam.
@@ -60,7 +60,7 @@
  an error.</p>
  @throws OZZipException If the stream could not be closed due to an error.
  */
-- (void) finishedReading;
+- (void) finishedReading NS_SWIFT_UNAVAILABLE("Use version defined in OZZipReadStream+NSError which doesn't throw Objective C exceptions");
 
 
 @end

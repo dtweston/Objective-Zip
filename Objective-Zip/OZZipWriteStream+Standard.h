@@ -47,7 +47,7 @@
  @param data The data to be compressed and written.
  @throws OZZipException If the data could not be written due to an error.
  */
-- (void) writeData:(nonnull NSData *)data;
+- (void) writeData:(nonnull NSData *)data NS_SWIFT_UNAVAILABLE("Use version defined in OZZipWriteStream+NSError which doesn't throw Objective C exceptions");
 
 /**
  @brief Closes the write stream.
@@ -57,7 +57,7 @@
  an error.</p>
  @throws OZZipException If the stream could not be closed due to an error.
  */
-- (void) finishedWriting;
+- (void) finishedWriting NS_SWIFT_UNAVAILABLE("Use version defined in OZZipWriteStream+NSError which doesn't throw Objective C exceptions");
 
 
 @end
