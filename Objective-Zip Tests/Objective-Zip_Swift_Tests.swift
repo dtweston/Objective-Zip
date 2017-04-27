@@ -50,37 +50,37 @@ class Objective_Zip_Swift_Tests: XCTestCase {
     }
     
     func test01ZipAndUnzip() {
-        let documentsUrl = NSURL(fileURLWithPath:NSHomeDirectory(), isDirectory:true).URLByAppendingPathComponent("Documents")
-        let fileUrl = documentsUrl.URLByAppendingPathComponent("test.zip")
-        let filePath = fileUrl.path!
+        let documentsUrl = URL(fileURLWithPath:NSHomeDirectory(), isDirectory:true).appendingPathComponent("Documents")
+        let fileUrl = documentsUrl.appendingPathComponent("test.zip")
+        let filePath = fileUrl.path
         
         do {
-            try NSFileManager.defaultManager().removeItemAtPath(filePath)
+            try FileManager.default.removeItem(atPath: filePath)
         } catch {}
         
         defer {
             do {
-                try NSFileManager.defaultManager().removeItemAtPath(filePath)
+                try FileManager.default.removeItem(atPath: filePath)
             } catch {}
         }
         
         do {
             NSLog("Test 1: opening zip file for writing...")
             
-            let zipFile = try OZZipFile(fileName:filePath, mode:OZZipFileMode.Create)
+            let zipFile = try OZZipFile(fileName:filePath, mode:.create)
             
             XCTAssertNotNil(zipFile)
             
             NSLog("Test 1: adding first file...")
             
-            let stream1 = try zipFile.writeFileInZipWithName("abc.txt", fileDate:NSDate(timeIntervalSinceNow:-86400.0), compressionLevel:OZZipCompressionLevel.Best)
+            let stream1 = try zipFile.writeInZip(withName: "abc.txt", fileDate:Date(timeIntervalSinceNow:-86400.0), compressionLevel:.best)
             
             XCTAssertNotNil(stream1)
             
             NSLog("Test 1: writing to first file's stream...")
             
             let text = "abc"
-            try stream1.writeData(text.dataUsingEncoding(NSUTF8StringEncoding)!)
+            try stream1.write(text.data(using: .utf8)!)
             
             NSLog("Test 1: closing first file's stream...")
             
@@ -89,14 +89,14 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             NSLog("Test 1: adding second file...")
             
             let file2name = "x/y/z/xyz.txt"
-            let stream2 = try zipFile.writeFileInZipWithName(file2name, compressionLevel:OZZipCompressionLevel.None)
+            let stream2 = try zipFile.writeInZip(withName: file2name, compressionLevel:.none)
             
             XCTAssertNotNil(stream2)
             
             NSLog("Test 1: writing to second file's stream...")
             
             let text2 = "XYZ"
-            try stream2.writeData(text2.dataUsingEncoding(NSUTF8StringEncoding)!)
+            try stream2.write(text2.data(using: .utf8)!)
             
             NSLog("Test 1: closing second file's stream...")
             
@@ -108,7 +108,7 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             
             NSLog("Test 1: opening zip file for reading...")
             
-            let unzipFile = try OZZipFile(fileName:filePath, mode:OZZipFileMode.Unzip)
+            let unzipFile = try OZZipFile(fileName:filePath, mode:.unzip)
             
             XCTAssertNotNil(unzipFile)
             
@@ -120,13 +120,13 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             
             let info1 = infos[0] as! OZFileInZipInfo
             
-            XCTAssertEqualWithAccuracy(NSDate().timeIntervalSinceReferenceDate, info1.date.timeIntervalSinceReferenceDate + 86400, accuracy:5.0)
+            XCTAssertEqualWithAccuracy(Date().timeIntervalSinceReferenceDate, info1.date.timeIntervalSinceReferenceDate + 86400, accuracy:5.0)
             
             NSLog("Test 1: - \(info1.name) \(info1.date) \(info1.size) (\(info1.level))")
             
             let info2 = infos[1] as! OZFileInZipInfo
             
-            XCTAssertEqualWithAccuracy(NSDate().timeIntervalSinceReferenceDate, info2.date.timeIntervalSinceReferenceDate, accuracy:5.0)
+            XCTAssertEqualWithAccuracy(Date().timeIntervalSinceReferenceDate, info2.date.timeIntervalSinceReferenceDate, accuracy:5.0)
             
             NSLog("Test 1: - \(info2.name) \(info2.date) \(info2.size) (\(info2.level))")
             
@@ -140,11 +140,11 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             NSLog("Test 1: reading from first file's stream...")
             
             let data1 = NSMutableData(length:256)!
-            let bytesRead1 = try read1.readDataWithBuffer(data1)
+            let bytesRead1 = try read1.readData(withBuffer: data1)
             
             XCTAssertEqual(3, bytesRead1)
             
-            let fileText1 = NSString(bytes:data1.bytes, length:Int(bytesRead1), encoding:NSUTF8StringEncoding)
+            let fileText1 = NSString(bytes:data1.bytes, length:bytesRead1, encoding:String.Encoding.utf8.rawValue)
             
             XCTAssertEqual("abc", fileText1)
             
@@ -154,7 +154,7 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             
             NSLog("Test 1: opening second file...")
             
-            try unzipFile.locateFileInZip(file2name)
+            try unzipFile.locateFile(inZip: file2name)
             let read2 = try unzipFile.readCurrentFileInZip()
             
             XCTAssertNotNil(read2)
@@ -162,11 +162,11 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             NSLog("Test 1: reading from second file's stream...")
             
             let data2 = NSMutableData(length:256)!
-            let bytesRead2 = try read2.readDataWithBuffer(data2)
+            let bytesRead2 = try read2.readData(withBuffer: data2)
             
             XCTAssertEqual(3, bytesRead2)
             
-            let fileText2 = NSString(bytes:data2.bytes, length:Int(bytesRead2), encoding:NSUTF8StringEncoding)
+            let fileText2 = NSString(bytes:data2.bytes, length:bytesRead2, encoding:String.Encoding.utf8.rawValue)
             
             XCTAssertEqual("XYZ", fileText2)
             
@@ -181,9 +181,9 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             NSLog("Test 1: test terminated succesfully")
         
         } catch let error as NSError {
-            NSLog("Test 1: error caught: \(error.code) - \(error.userInfo[NSLocalizedFailureReasonErrorKey])")
+            NSLog("Test 1: error caught: \(error.code) - \(error.localizedFailureReason ?? "")")
             
-            XCTFail("Error caught: \(error.code) - \(error.userInfo[NSLocalizedFailureReasonErrorKey])")
+            XCTFail("Error caught: \(error.code) - \(error.localizedFailureReason ?? "")")
 
         } catch let error {
             NSLog("Test 1: generic error caught: \(error)")
@@ -194,50 +194,53 @@ class Objective_Zip_Swift_Tests: XCTestCase {
     
     /* 
      * Uncomment to execute this test, but be careful: takes 5 minutes and consumes 5 GB of disk space
-     *
-    func test02ZipAndUnzip5GB() {
+     */
+    func Disabled_test02ZipAndUnzip5GB() {
     
-        let documentsUrl = NSURL(fileURLWithPath:NSHomeDirectory(), isDirectory:true).URLByAppendingPathComponent("Documents")
-        let fileUrl = documentsUrl.URLByAppendingPathComponent("huge_test.zip")
-        let filePath = fileUrl.path!
+        let documentsUrl = URL(fileURLWithPath:NSHomeDirectory(), isDirectory:true).appendingPathComponent("Documents")
+        let fileUrl = documentsUrl.appendingPathComponent("huge_test.zip")
+        let filePath = fileUrl.path
         
         do {
-            try NSFileManager.defaultManager().removeItemAtPath(filePath)
+            try FileManager.default.removeItem(atPath: filePath)
         } catch {}
 
         defer {
             do {
-                try NSFileManager.defaultManager().removeItemAtPath(filePath)
+                try FileManager.default.removeItem(atPath: filePath)
             } catch {}
         }
         
         do {
             NSLog("Test 2: opening zip file for writing...")
             
-            let zipFile = try OZZipFile(fileName:filePath, mode:OZZipFileMode.Create)
+            let zipFile = try OZZipFile(fileName:filePath, mode:.create)
             
             XCTAssertNotNil(zipFile)
             
             NSLog("Test 2: adding file...")
             
-            let stream = try zipFile.writeFileInZipWithName("huge_file.txt", compressionLevel:OZZipCompressionLevel.Best)
+            let stream = try zipFile.writeInZip(withName: "huge_file.txt", compressionLevel: .best)
             
             XCTAssertNotNil(stream)
             
             NSLog("Test 2: writing to file's stream...")
             
-            let data = NSMutableData(length:HUGE_TEST_BLOCK_LENGTH)!
-            SecRandomCopyBytes(kSecRandomDefault, data.length, UnsafeMutablePointer<UInt8>(data.mutableBytes))
+            var data = Data(count: HUGE_TEST_BLOCK_LENGTH)
+            data.withUnsafeMutableBytes({ (bytes: UnsafeMutablePointer<UInt8>) -> () in
+                let status = SecRandomCopyBytes(kSecRandomDefault, data.count, bytes)
+                XCTAssert(status == errSecSuccess)
+            })
             
-            let checkData = data.subdataWithRange(NSMakeRange(0, 100))
+            let checkData = Data(data.prefix(100))
             
             let buffer = NSMutableData(length:HUGE_TEST_BLOCK_LENGTH)! // For use later
             
-            for (var i = 0; i < HUGE_TEST_NUMBER_OF_BLOCKS; i++) {
-                try stream.writeData(data)
+            for i in 0 ..< HUGE_TEST_NUMBER_OF_BLOCKS {
+                try stream.write(data)
                 
                 if (i % 100 == 0) {
-                    NSLog("Test 2: written \((data.length / 1024) * (i + 1))  KB...")
+                    NSLog("Test 2: written \((data.count / 1024) * (i + 1))  KB...")
                 }
             }
             
@@ -251,7 +254,7 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             
             NSLog("Test 2: opening zip file for reading...")
             
-            let unzipFile = try OZZipFile(fileName:filePath, mode:OZZipFileMode.Unzip)
+            let unzipFile = try OZZipFile(fileName:filePath, mode:.unzip)
             
             XCTAssertNotNil(unzipFile)
             
@@ -276,16 +279,16 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             
             NSLog("Test 2: reading from file's stream...")
             
-            for (var i = 0; i < HUGE_TEST_NUMBER_OF_BLOCKS; i++) {
-                let bytesRead = try read.readDataWithBuffer(buffer)
+            for i in 0 ..< HUGE_TEST_NUMBER_OF_BLOCKS {
+                let bytesRead = try read.readData(withBuffer: buffer)
                 
-                XCTAssertEqual(data.length, bytesRead)
-                
-                let range = buffer.rangeOfData(checkData, options:NSDataSearchOptions(), range:NSMakeRange(0, buffer.length))
+                XCTAssertEqual(data.count, bytesRead)
+
+                let range = buffer.range(of: checkData, in:NSMakeRange(0, buffer.length))
                 
                 XCTAssertEqual(0, range.location)
                 
-                if (i % 100 == 0) {
+                if i % 100 == 0 {
                     NSLog("Test 2: read \((buffer.length / 1024) * (i + 1))) KB...")
                 }
             }
@@ -301,35 +304,34 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             NSLog("Test 2: test terminated succesfully")
         
         } catch let error as NSError {
-            NSLog("Test 2: error caught: \(error.code) - \(error.userInfo[NSLocalizedFailureReasonErrorKey])")
+            NSLog("Test 2: error caught: \(error.code) - \(error.localizedFailureReason ?? "")")
             
-            XCTFail("Error caught: \(error.code) - \(error.userInfo[NSLocalizedFailureReasonErrorKey])")
+            XCTFail("Error caught: \(error.code) - \(error.localizedFailureReason ?? "")")
         }
     }
-     */
     
     func test03UnzipMacZipFile() -> () {
-        let documentsUrl = NSURL(fileURLWithPath:NSHomeDirectory(), isDirectory:true).URLByAppendingPathComponent("Documents")
-        let fileUrl = documentsUrl.URLByAppendingPathComponent("mac_test_file.zip")
-        let filePath = fileUrl.path!
+        let documentsUrl = URL(fileURLWithPath:NSHomeDirectory(), isDirectory:true).appendingPathComponent("Documents")
+        let fileUrl = documentsUrl.appendingPathComponent("mac_test_file.zip")
+        let filePath = fileUrl.path
         
         do {
-            try NSFileManager.defaultManager().removeItemAtPath(filePath)
+            try FileManager.default.removeItem(atPath: filePath)
         } catch {}
 
-        let macZipData = NSData(base64EncodedString:MAC_TEST_ZIP, options:NSDataBase64DecodingOptions())!
-        macZipData.writeToFile(filePath, atomically:false)
+        let macZipData = Data(base64Encoded:MAC_TEST_ZIP)!
+        try? macZipData.write(to: URL(fileURLWithPath: filePath))
         
         defer {
             do {
-                try NSFileManager.defaultManager().removeItemAtPath(filePath)
+                try FileManager.default.removeItem(atPath: filePath)
             } catch {}
         }
         
         do {
             NSLog("Test 3: opening zip file for reading...")
             
-            let unzipFile = try OZZipFile(fileName:filePath, mode:OZZipFileMode.Unzip)
+            let unzipFile = try OZZipFile(fileName:filePath, mode:.unzip)
             
             XCTAssertNotNil(unzipFile)
             
@@ -343,9 +345,9 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             NSLog("Test 3: reading from file's stream...")
             
             let buffer = NSMutableData(length:1024)!
-            let bytesRead = try read.readDataWithBuffer(buffer)
+            let bytesRead = try read.readData(withBuffer: buffer)
             
-            let fileText = NSString(bytes:buffer.bytes, length:Int(bytesRead), encoding:NSUTF8StringEncoding)
+            let fileText = NSString(bytes:buffer.bytes, length:bytesRead, encoding:String.Encoding.utf8.rawValue)
             
             XCTAssertEqual("Objective-Zip Mac test file\n", fileText)
             
@@ -360,34 +362,34 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             NSLog("Test 3: test terminated succesfully")
         
         } catch let error as NSError {
-            NSLog("Test 3: error caught: \(error.code) - \(error.userInfo[NSLocalizedFailureReasonErrorKey])")
+            NSLog("Test 3: error caught: \(error.code) - \(error.localizedFailureReason ?? "")")
             
-            XCTFail("Error caught: \(error.code) - \(error.userInfo[NSLocalizedFailureReasonErrorKey])")
+            XCTFail("Error caught: \(error.code) - \(error.localizedFailureReason ?? "")")
         }
     }
     
     func test04UnzipWinZipFile() {
-        let documentsUrl = NSURL(fileURLWithPath:NSHomeDirectory(), isDirectory:true).URLByAppendingPathComponent("Documents")
-        let fileUrl = documentsUrl.URLByAppendingPathComponent("win_test_file.zip")
-        let filePath = fileUrl.path!
+        let documentsUrl = URL(fileURLWithPath:NSHomeDirectory(), isDirectory:true).appendingPathComponent("Documents")
+        let fileUrl = documentsUrl.appendingPathComponent("win_test_file.zip")
+        let filePath = fileUrl.path
         
         do {
-            try NSFileManager.defaultManager().removeItemAtPath(filePath)
+            try FileManager.default.removeItem(atPath: filePath)
         } catch {}
 
-        let winZipData = NSData(base64EncodedString:WIN_TEST_ZIP, options:NSDataBase64DecodingOptions())!
-        winZipData.writeToFile(filePath, atomically:false)
+        let winZipData = Data(base64Encoded:WIN_TEST_ZIP)!
+        try? winZipData.write(to: URL(fileURLWithPath: filePath))
         
         defer {
             do {
-                try NSFileManager.defaultManager().removeItemAtPath(filePath)
+                try FileManager.default.removeItem(atPath: filePath)
             } catch {}
         }
         
         do {
             NSLog("Test 4: opening zip file for reading...")
             
-            let unzipFile = try OZZipFile(fileName:filePath, mode:OZZipFileMode.Unzip)
+            let unzipFile = try OZZipFile(fileName:filePath, mode:.unzip)
             
             XCTAssertNotNil(unzipFile)
             
@@ -401,9 +403,9 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             NSLog("Test 4: reading from file's stream...")
             
             let buffer = NSMutableData(length:1024)!
-            let bytesRead = try read.readDataWithBuffer(buffer)
+            let bytesRead = try read.readData(withBuffer: buffer)
             
-            let fileText = NSString(bytes:buffer.bytes, length:Int(bytesRead), encoding:NSUTF8StringEncoding)
+            let fileText = NSString(bytes:buffer.bytes, length:bytesRead, encoding:String.Encoding.utf8.rawValue)
             
             XCTAssertEqual("Objective-Zip Windows test file\r\n", fileText)
             
@@ -418,26 +420,26 @@ class Objective_Zip_Swift_Tests: XCTestCase {
             NSLog("Test 4: test terminated succesfully")
         
         } catch let error as NSError {
-            NSLog("Test 4: error caught: \(error.code) - \(error.userInfo[NSLocalizedFailureReasonErrorKey])")
+            NSLog("Test 4: error caught: \(error.code) - \(error.localizedFailureReason ?? "")")
             
-            XCTFail("Error caught: \(error.code) - \(error.userInfo[NSLocalizedFailureReasonErrorKey])")
+            XCTFail("Error caught: \(error.code) - \(error.localizedFailureReason ?? "")")
         }
     }
     
     func test05ErrorWrapping() {
-        let fileUrl = NSURL(fileURLWithPath:"/root.zip", isDirectory:false)
-        let filePath = fileUrl.path!
+        let fileUrl = URL(fileURLWithPath:"/root.zip", isDirectory:false)
+        let filePath = fileUrl.path
         
         defer {
             do {
-                try NSFileManager.defaultManager().removeItemAtPath(filePath)
+                try FileManager.default.removeItem(atPath: filePath)
             } catch {}
         }
 
         do {
             NSLog("Test 5: opening impossible zip file for writing...")
             
-            let zipFile = try OZZipFile(fileName:filePath, mode:OZZipFileMode.Create)
+            let zipFile = try OZZipFile(fileName:filePath, mode:.create)
             
             try zipFile.close()
             
