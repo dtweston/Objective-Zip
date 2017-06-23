@@ -231,7 +231,7 @@ static const NSInteger OZLocateFileResultFound= 1;
  @throws OZZipException If the zip file has been opened with a mode other than
  Unzip.
  */
-- (NSInteger)locateFileInZip:(nonnull NSString *)fileNameInZip error:(NSError * __autoreleasing __nullable * __nullable)error __attribute__((swift_error(nonnull_error)));
+- (NSInteger)locateFileInZip:(nonnull NSString *)fileNameInZip error:(NSError * __autoreleasing __nullable * __nullable)error __attribute__((swift_error(zero_result)));
 
 /**
  @brief Returns the number of files contained in the zip file.
@@ -242,7 +242,7 @@ static const NSInteger OZLocateFileResultFound= 1;
  @throws OZZipException If the zip file has been opened with a mode other
  than Unzip.
  */
-- (NSUInteger)numFilesInZipWithError:(NSError * __autoreleasing __nullable * __nullable)error __attribute__((swift_error(nonnull_error)));
+- (NSUInteger)numFilesInZipWithError:(NSError * __autoreleasing __nullable * __nullable)error __attribute__((swift_error(zero_result)));
 
 /**
  @brief Returns a list of OZFileInZipInfo with the information on all the files
